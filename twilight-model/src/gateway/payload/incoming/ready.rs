@@ -1,12 +1,20 @@
 use crate::{
-    gateway::ShardId, guild::UnavailableGuild, oauth::PartialApplication, user::CurrentUser,
+    gateway::ShardId, guild::Guild, guild::UnavailableGuild, oauth::PartialApplication,
+    user::CurrentUser,
 };
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(untagged)]
+pub enum EitherGuild {
+    Unavailable(UnavailableGuild),
+    Available(Guild),
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Ready {
     pub application: PartialApplication,
-    pub guilds: Vec<UnavailableGuild>,
+    pub guilds: Vec<EitherGuild>,
     pub resume_gateway_url: String,
     pub session_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -18,6 +26,7 @@ pub struct Ready {
 
 #[cfg(test)]
 mod tests {
+    use super::EitherGuild;
     use super::Ready;
     use crate::{
         gateway::ShardId,
@@ -32,14 +41,14 @@ mod tests {
     #[allow(clippy::too_many_lines)]
     fn ready() {
         let guilds = vec![
-            UnavailableGuild {
+            EitherGuild::Unavailable(UnavailableGuild {
                 id: Id::new(1),
                 unavailable: true,
-            },
-            UnavailableGuild {
+            }),
+            EitherGuild::Unavailable(UnavailableGuild {
                 id: Id::new(2),
                 unavailable: true,
-            },
+            }),
         ];
 
         let ready = Ready {
