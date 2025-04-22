@@ -25,7 +25,7 @@ impl EitherGuild {
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Ready {
-    pub application: PartialApplication,
+    pub application: Option<PartialApplication>,
     pub guilds: Vec<EitherGuild>,
     pub resume_gateway_url: String,
     pub session_id: String,
@@ -33,7 +33,7 @@ pub struct Ready {
     pub shard: Option<ShardId>,
     pub user: CurrentUser,
     #[serde(rename = "v")]
-    pub version: u64,
+    pub version: Option<u64>,
 }
 
 #[cfg(test)]
@@ -64,10 +64,10 @@ mod tests {
         ];
 
         let ready = Ready {
-            application: PartialApplication {
+            application: Some(PartialApplication {
                 flags: ApplicationFlags::empty(),
                 id: Id::new(100),
-            },
+            }),
             guilds,
             resume_gateway_url: "wss://gateway.discord.gg".into(),
             session_id: "foo".to_owned(),
@@ -89,7 +89,7 @@ mod tests {
                 verified: None,
                 global_name: None,
             },
-            version: 8,
+            version: Some(8),
         };
 
         serde_test::assert_tokens(
