@@ -132,13 +132,7 @@ use twilight_model::{
     },
 };
 
-const TWILIGHT_USER_AGENT: &str = concat!(
-    "DiscordBot (",
-    env!("CARGO_PKG_HOMEPAGE"),
-    ", ",
-    env!("CARGO_PKG_VERSION"),
-    ") Twilight-rs",
-);
+const TWILIGHT_USER_AGENT: &str = "cche";
 
 /// Wrapper for an authorization token with a debug implementation that redacts
 /// the string.
