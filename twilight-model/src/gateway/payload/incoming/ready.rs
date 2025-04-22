@@ -1,5 +1,8 @@
 use crate::{
-    gateway::ShardId, guild::Guild, guild::UnavailableGuild, oauth::PartialApplication,
+    gateway::ShardId,
+    guild::{Guild, UnavailableGuild},
+    id::{marker::GuildMarker, Id},
+    oauth::PartialApplication,
     user::CurrentUser,
 };
 use serde::{Deserialize, Serialize};
@@ -9,6 +12,15 @@ use serde::{Deserialize, Serialize};
 pub enum EitherGuild {
     Unavailable(UnavailableGuild),
     Available(Guild),
+}
+
+impl EitherGuild {
+    pub fn id(&self) -> Id<GuildMarker> {
+        match &self {
+            EitherGuild::Unavailable(ug) => ug.id,
+            EitherGuild::Available(g) => g.id,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
