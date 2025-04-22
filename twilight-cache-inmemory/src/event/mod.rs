@@ -71,7 +71,7 @@ impl<CacheModels: CacheableModels> UpdateCache<CacheModels> for Ready {
 
         if cache.wants(ResourceType::GUILD) {
             for guild in &self.guilds {
-                cache.unavailable_guild(guild.id);
+                cache.unavailable_guild(guild.id());
             }
         }
     }
