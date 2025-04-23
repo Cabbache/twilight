@@ -21,6 +21,14 @@ impl EitherGuild {
             EitherGuild::Available(g) => g.id,
         }
     }
+
+    pub fn obtain(&self) -> Option<&Guild> {
+        if let EitherGuild::Available(guild) = self {
+            Some(guild)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
