@@ -132,7 +132,13 @@ use twilight_model::{
     },
 };
 
-const TWILIGHT_USER_AGENT: &str = "cche";
+const TWILIGHT_USER_AGENT: &str = concat!(
+    "DiscordBot (",
+    env!("CARGO_PKG_HOMEPAGE"),
+    ", ",
+    env!("CARGO_PKG_VERSION"),
+    ") Twilight-rs",
+);
 
 /// Wrapper for an authorization token with a debug implementation that redacts
 /// the string.
@@ -242,6 +248,7 @@ pub struct Client {
     proxy: Option<Box<str>>,
     ratelimiter: Option<Box<dyn Ratelimiter>>,
     timeout: Duration,
+    ua: Box<str>,
     /// Whether the token has been invalidated.
     ///
     /// Whether an invalid token is tracked can be configured via
@@ -253,8 +260,8 @@ pub struct Client {
 
 impl Client {
     /// Create a new client with a token.
-    pub fn new(token: String) -> Self {
-        ClientBuilder::default().token(token).build()
+    pub fn new(token: String, bot: bool) -> Self {
+        ClientBuilder::default().token(token, bot).build()
     }
 
     /// Create a new builder to create a client.
@@ -2955,7 +2962,10 @@ impl Client {
                 HeaderValue::from_static("br"),
             );
 
-            headers.insert(USER_AGENT, HeaderValue::from_static(TWILIGHT_USER_AGENT));
+            headers.insert(
+                USER_AGENT,
+                HeaderValue::from_str(&self.ua).expect("bad header"),
+            );
 
             if let Some(req_headers) = req_headers {
                 for (maybe_name, value) in req_headers {

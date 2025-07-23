@@ -1,4 +1,4 @@
-use super::Token;
+use super::{Token, TWILIGHT_USER_AGENT};
 use crate::{client::connector, Client};
 use http::header::HeaderMap;
 use hyper_util::rt::TokioExecutor;
@@ -18,6 +18,7 @@ pub struct ClientBuilder {
     pub(crate) ratelimiter: Option<Box<dyn Ratelimiter>>,
     remember_invalid_token: bool,
     pub(crate) default_headers: Option<HeaderMap>,
+    pub(crate) ua: Option<Box<str>>,
     pub(crate) timeout: Duration,
     pub(super) token: Option<Token>,
     pub(crate) use_http: bool,
@@ -50,6 +51,7 @@ impl ClientBuilder {
             timeout: self.timeout,
             token_invalidated,
             token: self.token,
+            ua: self.ua.unwrap_or_else(|| TWILIGHT_USER_AGENT.into()),
             default_allowed_mentions: self.default_allowed_mentions,
             use_http: self.use_http,
         }
@@ -87,6 +89,11 @@ impl ClientBuilder {
         self.proxy.replace(proxy_url.into_boxed_str());
         self.use_http = use_http;
 
+        self
+    }
+
+    pub fn ua(mut self, ua: String) -> Self {
+        self.ua.replace(ua.into_boxed_str());
         self
     }
 
@@ -134,13 +141,13 @@ impl ClientBuilder {
     }
 
     /// Set the token to use for HTTP requests.
-    pub fn token(mut self, mut token: String) -> Self {
+    pub fn token(mut self, mut token: String, bot: bool) -> Self {
         let is_bot = token.starts_with("Bot ");
         let is_bearer = token.starts_with("Bearer ");
 
         // Make sure it is either a bot or bearer token, and assume it's a bot
         // token if no prefix is given
-        if !is_bot && !is_bearer {
+        if !is_bot && !is_bearer && bot {
             token.insert_str(0, "Bot ");
         }
 
@@ -159,6 +166,7 @@ impl Default for ClientBuilder {
             proxy: None,
             ratelimiter: Some(Box::new(InMemoryRatelimiter::default())),
             remember_invalid_token: true,
+            ua: Some(TWILIGHT_USER_AGENT.into()),
             timeout: Duration::from_secs(10),
             token: None,
             use_http: false,
